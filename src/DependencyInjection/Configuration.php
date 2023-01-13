@@ -32,6 +32,9 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('role_checker')
                     ->defaultValue('dh_auditor.role_checker')
                 ->end()
+                ->scalarNode('metadata_cache')
+                    ->defaultValue('none')
+                ->end()
                 ->append($this->getProvidersNode())
             ->end()
         ;

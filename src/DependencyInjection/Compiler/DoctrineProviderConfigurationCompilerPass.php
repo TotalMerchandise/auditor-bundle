@@ -73,6 +73,14 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
             $providerDefinition->addMethodCall('registerAuditingService', [$serviceReference]);
             $this->configureDHMiddleware($container, $entityManagerName);
         }
+
+        $extensionConfiguration = $container->getExtensionConfig('dh_auditor')[0];
+
+        if (isset($extensionConfiguration['metadata_cache']) && null !== isset($extensionConfiguration['metadata_cache'])) {
+            $metadataCacheService = new Reference($extensionConfiguration['metadata_cache']);
+
+            $providerDefinition->addMethodCall('registerMetadataCacheService', [$metadataCacheService]);
+        }
     }
 
     private function registerDHMiddleware(ContainerBuilder $container): void

@@ -99,3 +99,8 @@ services:
     arguments: ['@DH\AuditorBundle\User\ConsoleUserProvider', '@DH\Auditor\Configuration', '@dh_auditor.user_provider']
     tags:
       - { name: kernel.event_subscriber }
+
+  DH\AuditorBundle\Warmer\MetadataCacheWarmer:
+    arguments: ['@DH\Auditor\Provider\Doctrine\DoctrineProvider']
+    tags:
+      - { name: kernel.cache_warmer, priority: 0 }
