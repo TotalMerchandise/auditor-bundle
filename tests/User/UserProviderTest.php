@@ -11,6 +11,7 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\DHAuditorBundle;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\HttpKernelBrowser;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -29,6 +30,7 @@ final class UserProviderTest extends WebTestCase
     use ReaderTrait;
 
     private DoctrineProvider $provider;
+    private HttpKernelBrowser $client;
 
     protected function setUp(): void
     {
@@ -63,12 +65,7 @@ final class UserProviderTest extends WebTestCase
             $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
         }
 
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            self::$container->get('security.token_storage')->setToken($token);
-        } else {
-            self::getContainer()->get('security.token_storage')->setToken($token);
-        }
+        self::getContainer()->get('security.token_storage')->setToken($token);
 
         $post = new Post();
         $post
@@ -78,6 +75,7 @@ final class UserProviderTest extends WebTestCase
         ;
         $auditingServices[Post::class]->getEntityManager()->persist($post);
         $this->flushAll($auditingServices);
+
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
         self::assertSame('dark.vador', $entries[0]->getUsername());
@@ -102,12 +100,7 @@ final class UserProviderTest extends WebTestCase
             $token = new SwitchUserToken($secondUser, null, $firewallName, $secondUser->getRoles(), $userToken);
         }
 
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            self::$container->get('security.token_storage')->setToken($token);
-        } else {
-            self::getContainer()->get('security.token_storage')->setToken($token);
-        }
+        self::getContainer()->get('security.token_storage')->setToken($token);
 
         $post = new Post();
         $post
@@ -117,6 +110,7 @@ final class UserProviderTest extends WebTestCase
         ;
         $auditingServices[Post::class]->getEntityManager()->persist($post);
         $this->flushAll($auditingServices);
+
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
         self::assertSame('second_user[impersonator dark.vador]', $entries[0]->getUsername());
@@ -129,14 +123,6 @@ final class UserProviderTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            $this->provider = self::$container->get(DoctrineProvider::class);
-
-            return;
-        }
-
-        // Symfony >= 5.x only
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 

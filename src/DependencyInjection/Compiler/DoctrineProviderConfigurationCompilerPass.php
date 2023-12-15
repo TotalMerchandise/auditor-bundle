@@ -93,7 +93,7 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 
     private function configureDHMiddleware(ContainerBuilder $container, string $entityManagerName): void
     {
-        if (false === $this->isDHMiddlewareSupported) {
+        if (!$this->isDHMiddlewareSupported) {
             return;
         }
 
@@ -101,6 +101,7 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
         if (!$argument instanceof Reference) {
             return;
         }
+
         $connectionName = (string) $argument;
 
         /** @see vendor/doctrine/doctrine-bundle/DependencyInjection/DoctrineExtension.php */

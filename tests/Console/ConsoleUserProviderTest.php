@@ -12,7 +12,6 @@ use DH\AuditorBundle\DHAuditorBundle;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\ApplicationTester;
-use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @internal
@@ -55,15 +54,15 @@ final class ConsoleUserProviderTest extends KernelTestCase
 
         $tester->run(['app:post:create']);
 
-        if (Kernel::MAJOR_VERSION >= 5) {
-            $tester->assertCommandIsSuccessful('Expect it to run');
-        }
+        $tester->assertCommandIsSuccessful('Expect it to run');
 
         $this->flushAll($auditingServices);
+
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        self::assertSame('app:post:create', $entries[0]->getUsername());
-        self::assertSame('command', $entries[0]->getUserId());
+        self::assertNotEmpty($entries, 'There are audit entries');
+        self::assertSame('app:post:create', $entries[0]->getUsername(), 'Username is OK');
+        self::assertSame('command', $entries[0]->getUserId(), 'User ID is OK');
     }
 
     protected function getBundleClass()
@@ -73,14 +72,6 @@ final class ConsoleUserProviderTest extends KernelTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            $this->provider = self::$container->get(DoctrineProvider::class);
-
-            return;
-        }
-
-        // Symfony >= 5.x only
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 }
